@@ -20,38 +20,52 @@ export default function Login({ onLoginSuccess }) {
         set_form_data({ ...form_data, [e.target.name]: e.target.value });
     };
 
-    const toggle_mode = ()=>{
+    const toggle_mode = () => {
         set_is_login(!is_login);
         set_error_msg('');
+
     }
+
+    const [is_loading, set_is_loading] = useState(false);
 
     const handle_submit = async (e) => {
         e.preventDefault();
         set_error_msg('');
+        set_is_loading(true);
 
         try {
             if (is_login) {
-                // Backend /user/login route check karega aadharCardNumber aur password
                 const res = await apiRequest('/user/login', 'POST', {
                     aadharCardNumber: Number(form_data.aadharCardNumber),
                     password: form_data.password
                 });
                 localStorage.setItem('token', res.token);
+
+                //  Backend se jo user object aaya hai, uska naam save kar lo
+                if (res.user && res.user.name) {
+                    localStorage.setItem('user_name', res.user.name);
+                }
+
                 alert('Login Successful!');
                 onLoginSuccess();
             } else {
-                // Backend /user/signup route
                 const res = await apiRequest('/user/signup', 'POST', {
                     ...form_data,
                     age: Number(form_data.age),
                     aadharCardNumber: Number(form_data.aadharCardNumber)
                 });
                 localStorage.setItem('token', res.token);
+
+                //  Signup ke waqt form data se naam save kar lo
+                localStorage.setItem('user_name', form_data.name);
+
                 alert('Signup Successful!');
                 onLoginSuccess();
             }
         } catch (error) {
             set_error_msg(error.message);
+        } finally {
+            set_is_loading(false);
         }
     };
 
@@ -107,8 +121,10 @@ export default function Login({ onLoginSuccess }) {
                         <input type="password" name="password" value={form_data.password} onChange={handle_input_change} required style={{ width: '100%', padding: '8px', marginTop: '2px', border: '1px solid #ccc', borderRadius: '4px' }} />
                     </div>
 
-                    <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}>
-                        {is_login ? 'Login' : 'Sign Up'}
+                    <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: is_loading ? '#93c5fd' : '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}>
+                        {is_loading && 'Processing... Please wait...'}
+                        {!is_loading && is_login && 'Login'}
+                        {!is_loading && !is_login && 'Sign Up'}
                     </button>
                 </form>
 

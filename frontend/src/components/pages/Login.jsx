@@ -1,4 +1,3 @@
-// client/src/components/pages/Login.jsx
 import { useState } from 'react';
 import { apiRequest } from '../common/api';
 
@@ -34,6 +33,8 @@ export default function Login({ onLoginSuccess }) {
         set_is_loading(true);
 
         try {
+            localStorage.removeItem('user_name');
+
             if (is_login) {
                 const res = await apiRequest('/user/login', 'POST', {
                     aadharCardNumber: Number(form_data.aadharCardNumber),
@@ -41,9 +42,11 @@ export default function Login({ onLoginSuccess }) {
                 });
                 localStorage.setItem('token', res.token);
 
-                //  Backend se jo user object aaya hai, uska naam save kar lo
+                //name that come from the backend, just save here
                 if (res.user && res.user.name) {
                     localStorage.setItem('user_name', res.user.name);
+                } else if (res.name) {
+                    localStorage.setItem('user_name', res.name);
                 }
 
                 alert('Login Successful!');
@@ -56,8 +59,12 @@ export default function Login({ onLoginSuccess }) {
                 });
                 localStorage.setItem('token', res.token);
 
-                //  Signup ke waqt form data se naam save kar lo
-                localStorage.setItem('user_name', form_data.name);
+                //save the name while signup for greeting
+                if (res.response && res.response.name) {
+                    localStorage.setItem('user_name', res.response.name);
+                } else {
+                    localStorage.setItem('user_name', form_data.name);
+                }
 
                 alert('Signup Successful!');
                 onLoginSuccess();

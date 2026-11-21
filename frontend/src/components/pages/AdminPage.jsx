@@ -1,4 +1,3 @@
-// client/src/components/pages/AdminPage.jsx
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../common/api';
 
@@ -8,7 +7,7 @@ export default function AdminPage({ onBackToVoting }) {
     const [party, set_party] = useState('');
     const [age, set_age] = useState('');
 
-    // सभी कैंडिडेट्स की लिस्ट लोड करें
+    // Loading all the cendidate's list here
     const fetch_candidates = async () => {
         try {
             const res = await apiRequest('/candidate', 'GET');
@@ -22,7 +21,7 @@ export default function AdminPage({ onBackToVoting }) {
         fetch_candidates();
     }, []);
 
-    // नया कैंडिडेट जोड़ने का फंक्शन
+    // function for adding new candidate
     const handle_add_candidate = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
@@ -38,7 +37,7 @@ export default function AdminPage({ onBackToVoting }) {
         }
     };
 
-    // कैंडिडेट को हटाने का फंक्शन (Admin Remove Access)
+    // function for candidate removal (Admin Remove Access)
     const handle_remove_candidate = async (candidate_id) => {
         if (!window.confirm('Are you sure you want to remove this candidate?')) return;
 
@@ -46,7 +45,7 @@ export default function AdminPage({ onBackToVoting }) {
         try {
             await apiRequest(`/candidate/${candidate_id}`, 'DELETE', null, token);
             alert('Candidate removed successfully!');
-            fetch_candidates(); // लिस्ट को दोबारा रिफ्रेश करें
+            fetch_candidates(); 
         } catch (err) {
             alert(err.message);
         }
@@ -54,7 +53,7 @@ export default function AdminPage({ onBackToVoting }) {
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6', padding: '16px' }}>
-            {/* Header Section - Mobile Friendly FlexWrap */}
+            {/* Header section */}
             <div style={{ 
                 maxWidth: '800px', 
                 margin: '0 auto 24px auto', 
@@ -76,8 +75,6 @@ export default function AdminPage({ onBackToVoting }) {
                     Back to Voting Dashboard
                 </button>
             </div>
-
-            {/* Responsive Grid: Mobile par 1 column, Desktop par 2 columns */}
             <div style={{ 
                 maxWidth: '800px', 
                 margin: '0 auto', 
@@ -85,7 +82,7 @@ export default function AdminPage({ onBackToVoting }) {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
                 gap: '20px' 
             }}>
-                {/* Add Candidate Form */}
+                {/*Candidate form */}
                 <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: 'fit-content' }}>
                     <h3 style={{ marginTop: '0', marginBottom: '15px', color: '#1f2937' }}>Add New Candidate</h3>
                     <form onSubmit={handle_add_candidate} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -107,7 +104,7 @@ export default function AdminPage({ onBackToVoting }) {
                     </form>
                 </div>
 
-                {/* Manage Candidates List with Remove Option */}
+                {/*Manage candidates list with remove option */}
                 <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <h3 style={{ marginTop: '0', marginBottom: '15px', color: '#1f2937' }}>Manage Candidates</h3>
                     {candidates.length === 0 ? (
@@ -119,7 +116,7 @@ export default function AdminPage({ onBackToVoting }) {
                                     <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>{cand.name}</p>
                                     <p style={{ fontSize: '14px', color: '#6b7280', margin: '0' }}>Party: {cand.party}</p>
                                 </div>
-                                {/* Admin Remove Button */}
+                                {/*remove button */}
                                 <button
                                     onClick={() => handle_remove_candidate(cand._id)}
                                     style={{ padding: '6px 12px', backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', flexShrink: 0 }}>

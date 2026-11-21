@@ -7,6 +7,29 @@ export default function VotingPage({ onLogout }) {
     const [loading, set_loading] = useState(true);
     const [user_name, set_user_name] = useState('');
 
+    const load_user_name = async () => {
+        const stored_name = localStorage.getItem('user_name');
+        if (stored_name) {
+            set_user_name(stored_name);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return;
+        }
+
+        try {
+            const profile_res = await apiRequest('/user/profile', 'GET', null, token);
+            if (profile_res && profile_res.name) {
+                set_user_name(profile_res.name);
+                localStorage.setItem('user_name', profile_res.name);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const fetch_voting_data = async () => {
         try {
             const candidates_res = await apiRequest('/candidate', 'GET');
@@ -22,11 +45,7 @@ export default function VotingPage({ onLogout }) {
     };
 
     useEffect(() => {
-        // localStorage se stored username nikalna
-        const stored_name = localStorage.getItem('user_name');
-        if (stored_name) {
-            set_user_name(stored_name);
-        }
+        load_user_name();
         fetch_voting_data();
     }, []);
 
@@ -45,9 +64,14 @@ export default function VotingPage({ onLogout }) {
         return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading voting dashboard...</div>;
     }
 
+    let greeting_name = 'Voter';
+    if (user_name) {
+        greeting_name = user_name;
+    }
+
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6', padding: '16px' }}>
-            {/* Header Section with Hello Username & Right-Aligned Logout Button */}
+            {/* Header Section with Greeting user and logout button */}
             <div style={{
                 maxWidth: '800px',
                 margin: '0 auto 24px auto',
@@ -62,7 +86,7 @@ export default function VotingPage({ onLogout }) {
             }}>
                 <div style={{ flex: 1 }}>
                     <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#1f2937' }}>
-                        Hello, {user_name || 'Voter'} 👋
+                        Hello, {greeting_name} 👋
                     </h2>
                     <p style={{ margin: '0', fontSize: '12px', color: '#6b7280' }}>
                         Welcome to the Online Voting Dashboard
@@ -86,7 +110,7 @@ export default function VotingPage({ onLogout }) {
                 </button>
             </div>
 
-            {/* Voting Grid Sections */}
+            {/* Voting sections */}
             <div style={{
                 maxWidth: '800px',
                 margin: '0 auto',
@@ -94,7 +118,7 @@ export default function VotingPage({ onLogout }) {
                 flexDirection: 'column',
                 gap: '20px'
             }}>
-                {/* Live Vote Count Card */}
+                {/* Live vote count section */}
                 <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <h3 style={{ color: '#9333ea', marginTop: '0', marginBottom: '15px' }}>Live Vote Count</h3>
                     {vote_counts.map((item, index) => (
@@ -107,7 +131,7 @@ export default function VotingPage({ onLogout }) {
                     ))}
                 </div>
 
-                {/* Candidates Card */}
+                {/* Candidates card */}
                 <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                     <h3 style={{ color: '#2563eb', marginTop: '0', marginBottom: '15px' }}>Candidates</h3>
                     {candidates.map((cand) => (
